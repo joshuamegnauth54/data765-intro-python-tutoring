@@ -10,7 +10,10 @@ class SmolPokeApiScraper():
     _POKEAPI = "https://pokeapi.co/api/v2/pokemon/{}"
 
     @classmethod
-    async def new(cls, cache_path="pokeapi_cache.json", throttle=5):
+    async def new(cls,
+                  cache_path="pokeapi_cache.json",
+                  throttle=5,
+                  timeout=30):
         logging.basicConfig(level=logging.INFO)
 
         self = SmolPokeApiScraper()
@@ -23,6 +26,7 @@ class SmolPokeApiScraper():
             raise
         self._session = Session()
         self._throttle = throttle
+        self._timeout = timeout
         return self
 
     async def _load_cache(self, cache_path):
@@ -53,10 +57,10 @@ class SmolPokeApiScraper():
         json_se = json.dumps(self._cache)
         async with aiofiles.open(self._cache_path, 'w') as cache:
             await cache.write(json_se)
-    
+
     async def __aenter__(self):
         return self
-    
+
     async def __aexit__(self, exc_type, exc, tb):
         await self.sync()
 
@@ -105,7 +109,7 @@ class SmolPokeApiScraper():
 
     def create_url(pokenum):
         """Create a PokéAPI URL from a Pokémon number.
-        
+
         Parameters
         ----------
         pokenum: int
@@ -148,7 +152,7 @@ class SmolPokeApiScraper():
 
             try:
                 url = SmolPokeApiScraper.create_url(pokenum)
-                resp = self._session.get(url)
+                resp = self._session.get(url, timeout=self._timeout)
                 # Raise an error for a non-200 HTTP status.
                 resp.raise_for_status()
                 resp = resp.json()
@@ -157,5 +161,5 @@ class SmolPokeApiScraper():
                 self.update({pokenum: resp})
             except HTTPError as e:
                 logging.critical(f"HTTP status error {e} for Pokémon number {pokenum}.")
-        
+
         return pokedata
