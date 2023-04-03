@@ -2,9 +2,10 @@
 
 """Load GSS data set and convert to a better, open file format."""
 
-import pandas as pd
 import sys
 from typing import Optional
+
+import pandas as pd
 
 argc: int = len(sys.argv)
 

@@ -1,11 +1,13 @@
+"""Functions for wrangling students' data sets."""
+from typing import Literal, TypeAlias
+
 import numpy as np
 import pandas as pd
-from typing import Literal, TypeAlias
 
 Number: TypeAlias = np.number | float | int | pd.Int64Dtype
 
 
-def recode_ethnic(ethnic: Number) -> str:
+def recode_ethnic(ethnic: Number) -> str | Literal[pd.NA]:
     """Recodes GSS's `ethnic` from magic numbers to strings.
 
     https://gssdataexplorer.norc.org/variables/5263/vshow
@@ -21,13 +23,50 @@ def recode_ethnic(ethnic: Number) -> str:
         Ethnicity as a string.
 
     """
-
     # [1, 42)
-    first_set: list[str] = ["Africa", "Austria", "Canada (French)", "Canada (Other)",
-                            "China", "Czechoslovakia", "Denmark", "England and Wales", "Finland", "France", "Germany", "Greece", "Hungary", "Ireland",
-                            "Italy", "Japan", "Mexico", "Netherlands", "Norway", "Phillipines", "Poland", "Puerto Rico",
-                            "Russia", "Scotland", "Spain", "Sweden", "Switzerland", "West Indies (Unspecified)", "Other", "Native American", "India", "Portugal", "Lithuania", "Yugoslavia", "Romania",
-                            "Belgium", "Arabic", "Other Spanish", "West Indies (non-Spanish)", "Other Asian", "Other European"]
+    first_set: list[str] = [
+        "Africa",
+        "Austria",
+        "Canada (French)",
+        "Canada (Other)",
+        "China",
+        "Czechoslovakia",
+        "Denmark",
+        "England and Wales",
+        "Finland",
+        "France",
+        "Germany",
+        "Greece",
+        "Hungary",
+        "Ireland",
+        "Italy",
+        "Japan",
+        "Mexico",
+        "Netherlands",
+        "Norway",
+        "Phillipines",
+        "Poland",
+        "Puerto Rico",
+        "Russia",
+        "Scotland",
+        "Spain",
+        "Sweden",
+        "Switzerland",
+        "West Indies (Unspecified)",
+        "Other",
+        "Native American",
+        "India",
+        "Portugal",
+        "Lithuania",
+        "Yugoslavia",
+        "Romania",
+        "Belgium",
+        "Arabic",
+        "Other Spanish",
+        "West Indies (non-Spanish)",
+        "Other Asian",
+        "Other European",
+    ]
 
     match ethnic:
         case _ if pd.isna(ethnic):
@@ -170,19 +209,20 @@ def recode_partyid(party: Number) -> Literal["Democrat", "Republican", "Other", 
             return pd.NA
 
 
-def recode_degree(degree: Number) -> Literal["No degree", "HS or assoc", "College"]:
+def recode_degree(
+    degree: Number,
+) -> Literal["No degree", "HS or assoc", "College", pd.NA]:
     """Recode and collapse degree into strings with less categories.
 
     Parameters
     ----------
     degree : Number
 
-    Return
-    ------
+    Returns
+    -------
     Literal["No degree", "HS or assoc", "College"]
         Recoded values.
     """
-
     match degree:
         case _ if pd.isna(degree):
             return pd.NA
@@ -202,13 +242,13 @@ def recode_degree_binary(degree: Number) -> Literal["HS or less", "Some college"
     Parameters
     ----------
     degree : Number
+        Magic number for `degree` in the GSS.
 
-    Return
-    ------
+    Returns
+    -------
     Literal["HS or less", "Some college"]
         Recoded values.
     """
-
     match degree:
         case _ if pd.isna(degree):
             return pd.NA
@@ -218,6 +258,60 @@ def recode_degree_binary(degree: Number) -> Literal["HS or less", "Some college"
             return "Some college"
         case _:
             return pd.NA
+
+
+def recode_letin_binary(
+    letin: Number | str,
+) -> Literal["Decrease", "Increase or stay the same"]:
+    """Recode letin1a to a binary feature.
+
+    Parameters
+    ----------
+    letin : Number
+
+    Returns
+    -------
+    Literal["Decrease", "Increase or stay the same"]
+        Recoded letin1a
+    """
+    match letin:
+        case _ if pd.isna(letin):
+            return pd.NA
+        case "Increased a lot" | "Increased a little" | "Remain the same" | 1 | 2 | 3:
+            return "Increase or stay the same"
+        case "Reduced a little" | "Reduced a lot" | 4 | 5:
+            return "Decrease"
+        case _:
+            return pd.NA
+
+
+def recode_age(age: int | Literal[np.nan, pd.NA]):
+    """Destroy age by recoding it into a category.
+
+    Parameters
+    ----------
+    age: int | Literal[np.nan, pd.NA]
+        `age` feature from GSS.
+
+    Returns
+    -------
+    str
+        Lossy, categorized age as a string.
+    """
+    if age in range(18, 30):
+        return "18-29"
+    elif age in range(30, 40):
+        return "30-39"
+    elif age in range(40, 50):
+        return "40-49"
+    elif age in range(50, 60):
+        return "50-59"
+    elif age in range(60, 70):
+        return "60-69"
+    elif age > 69:
+        return "70+"
+    else:
+        return pd.NA
 
 
 def recode_small_features(gss: pd.DataFrame) -> pd.DataFrame:
@@ -240,8 +334,7 @@ def recode_small_features(gss: pd.DataFrame) -> pd.DataFrame:
 
     # Does R speak a language other than English or Spanish?
     gss["othlang"] = (
-        gss["othlang"].astype("Int64").map(
-            {1: "Yes", 2: "No"}).astype("category")
+        gss["othlang"].astype("Int64").map({1: "Yes", 2: "No"}).astype("category")
     )
 
     race: dict[int, str] = {1: "White", 2: "Black", 3: "Other"}
@@ -265,6 +358,7 @@ def recode_small_features(gss: pd.DataFrame) -> pd.DataFrame:
                         "Mountain",
                         "Pacific",
                     ],
+                    strict=True,
                 )
             )
         )
@@ -276,8 +370,31 @@ def recode_small_features(gss: pd.DataFrame) -> pd.DataFrame:
         dict(
             zip(
                 range(1, 6),
-                ["Not comfortable at all", "A little",
-                 "Somewhat", "Very", "Extremely"],
+                ["Not comfortable at all", "A little", "Somewhat", "Very", "Extremely"],
+                strict=True,
             )
         )
     )
+
+    # Immigration
+    gss["letin1a"] = gss["letin1a"].map(
+        dict(
+            zip(
+                range(1, 6),
+                [
+                    "Increased a lot",
+                    "Increased a little",
+                    "Remain the same",
+                    "Reduced a little",
+                    "Reduced a lot",
+                ],
+                strict=True,
+            )
+        )
+    )
+
+    # Income
+    gss["coninc_log"] = np.log(gss["coninc"])
+    gss["coninc_quantiles"] = pd.qcut(gss["coninc"], 4)
+
+    return gss
