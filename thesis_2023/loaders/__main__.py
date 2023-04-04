@@ -26,6 +26,8 @@ if argc < 2:
 path: str = sys.argv[1]
 mode: str = sys.argv[2]
 
+# Features for both data sets
+# https://gssdataexplorer.norc.org/gssweighting
 safiya_vars: list[str] = [
     "year",
     "age",
@@ -38,7 +40,7 @@ safiya_vars: list[str] = [
     "coninc",
     "vstrat",
     "vpsu",
-    "wtssnrps",
+    "wtsscomp",
 ]
 safiya_vars_add: list[str] = ["decrease_imm", "hs_or_college"]
 theo_vars: list[str] = [
@@ -53,7 +55,7 @@ theo_vars: list[str] = [
     "talkspvs",
     "vstrat",
     "vpsu",
-    "wtssall",
+    "wtsscomp",
 ]
 theo_vars_add: list[str] = ["coninc_quantiles", "hs_or_college", "age_cat"]
 
@@ -71,6 +73,8 @@ elif mode == "students":
         path,
         engine="pyarrow",
         dtype={
+            "year": "Int64",
+            "age": "Int64",
             "ethnic": "Int64",
             "partyid": "Int64",
             "degree": "Int64",
@@ -80,6 +84,10 @@ elif mode == "students":
             "region": "Int64",
             "talkspvs": "Int64",
             "letin1a": "Int64",
+            "coninc": float,
+            "vstrat": float,
+            "vpsu": float,
+            "wtsscomp": float,
         },
     )
 
