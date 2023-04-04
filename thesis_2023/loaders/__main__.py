@@ -60,11 +60,29 @@ theo_vars: list[str] = [
 theo_vars_add: list[str] = ["coninc_quantiles", "hs_or_college", "age_cat"]
 
 if mode == "raw":
-    gss: pd.DataFrame = pd.read_csv(
-        path,
-        usecols=[set(*safiya_vars, *theo_vars)],
-        engine="pyarrow",
-    )
+    print(f"Loading GSS from {path}")
+    try:
+        gss: pd.DataFrame = pd.read_csv(
+            path,
+            usecols=set(safiya_vars + theo_vars),
+            engine="pyarrow",
+        )
+    except ValueError:
+        print(f"{path} is missing `wtsscomp` - creating the weights instead")
+
+        # Pop wtsscomp
+        theo_vars.pop()
+        safiya_vars.pop()
+
+        # Append old weights
+        theo_vars.append("wtssall")
+        safiya_vars.append("wtssps")
+
+        gss = pd.read_csv(path, usecols=set(safiya_vars + theo_vars), engine="pyarrow")
+        gss["wtsscomp"] = gss["wtssall"].fillna(gss["wtssps"])
+
+        assert gss["wtsscomp"].isna().sum() == 0
+        gss = gss.drop(columns=["wtssall", "wtssps"])
 
     print("Writing to ./gss_filtered.csv")
     gss.to_csv("gss_filtered.csv", index=False)
@@ -73,7 +91,7 @@ elif mode == "students":
         path,
         engine="pyarrow",
         dtype={
-            "year": "Int64",
+            "year": int,
             "age": "Int64",
             "ethnic": "Int64",
             "partyid": "Int64",
@@ -104,8 +122,8 @@ elif mode == "students":
     gss.to_csv("gss_wrangled.csv", index=False)
 
     print("Creating student specific data sets")
-    gss_saf: pd.DataFrame = gss[safiya_vars + safiya_vars_add]
-    gss_theo: pd.DataFrame = gss[theo_vars + theo_vars_add]
+    gss_saf: pd.DataFrame = gss[safiya_vars + safiya_vars_add].query("year >= 2010")
+    gss_theo: pd.DataFrame = gss[theo_vars + theo_vars_add].query("year >= 2008")
 
     print("Writing student data sets to CSV")
     gss_saf.to_csv("safiya_clean.csv", index=False)

@@ -72,6 +72,7 @@ def recode_ethnic(ethnic: Number) -> str | Literal[pd.NA]:
         case _ if pd.isna(ethnic):
             return pd.NA
         case eth if ethnic in range(1, 42):
+            eth = int(eth)
             return first_set[eth - 1]
         case 97:
             return "American Only"
@@ -220,7 +221,7 @@ def recode_degree(
 
     Returns
     -------
-    Literal["No degree", "HS or assoc", "College"]
+    Literal["No degree", "HS or assoc", "College", pd.NA]
         Recoded values.
     """
     match degree:
@@ -236,7 +237,9 @@ def recode_degree(
             return pd.NA
 
 
-def recode_degree_binary(degree: Number) -> Literal["HS or less", "Some college"]:
+def recode_degree_binary(
+    degree: Number,
+) -> Literal["HS or less", "Some college", pd.NA]:
     """Recode degree into a binary feature.
 
     Parameters
@@ -246,7 +249,7 @@ def recode_degree_binary(degree: Number) -> Literal["HS or less", "Some college"
 
     Returns
     -------
-    Literal["HS or less", "Some college"]
+    Literal["HS or less", "Some college", pd.NA]
         Recoded values.
     """
     match degree:
@@ -262,7 +265,7 @@ def recode_degree_binary(degree: Number) -> Literal["HS or less", "Some college"
 
 def recode_letin_binary(
     letin: Number | str,
-) -> Literal["Decrease", "Increase or stay the same"]:
+) -> Literal["Decrease", "Increase or stay the same", pd.NA]:
     """Recode letin1a to a binary feature.
 
     Parameters
@@ -271,7 +274,7 @@ def recode_letin_binary(
 
     Returns
     -------
-    Literal["Decrease", "Increase or stay the same"]
+    Literal["Decrease", "Increase or stay the same", pd.NA]
         Recoded letin1a
     """
     match letin:
@@ -298,7 +301,9 @@ def recode_age(age: int | Literal[np.nan, pd.NA]):
     str
         Lossy, categorized age as a string.
     """
-    if age in range(18, 30):
+    if pd.isna(age):
+        return pd.NA
+    elif age in range(18, 30):
         return "18-29"
     elif age in range(30, 40):
         return "30-39"
@@ -329,7 +334,7 @@ def recode_small_features(gss: pd.DataFrame) -> pd.DataFrame:
     pd.DataFrame
         DataFrame with recoded values.
     """
-    sex: dict[str, str] = {1: "Male", 2: "Female"}
+    sex: dict[int, str] = {1: "Male", 2: "Female"}
     gss["sex"].astype("Int64").map(sex).astype("category")
 
     # Does R speak a language other than English or Spanish?
