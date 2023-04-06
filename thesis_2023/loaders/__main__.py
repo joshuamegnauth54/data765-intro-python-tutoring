@@ -3,6 +3,8 @@
 """Wrangle student data sets from raw GSS."""
 
 import sys
+from itertools import chain
+from typing import Iterable
 
 import pandas as pd
 
@@ -28,6 +30,7 @@ mode: str = sys.argv[2]
 
 # Features for both data sets
 # https://gssdataexplorer.norc.org/gssweighting
+weights: list[str] = ["vstrat", "vpsu", "wtsscomp"]
 safiya_vars: list[str] = [
     "year",
     "age",
@@ -38,11 +41,8 @@ safiya_vars: list[str] = [
     "othlang",
     "letin1a",
     "coninc",
-    "vstrat",
-    "vpsu",
-    "wtsscomp",
-]
-safiya_vars_add: list[str] = ["decrease_imm", "hs_or_college"]
+] + weights
+safiya_vars_add: list[str] = ["coninc_log", "decrease_imm", "hs_or_college"]
 theo_vars: list[str] = [
     "year",
     "age",
@@ -53,11 +53,8 @@ theo_vars: list[str] = [
     "ethnic",
     "coninc",
     "talkspvs",
-    "vstrat",
-    "vpsu",
-    "wtsscomp",
-]
-theo_vars_add: list[str] = ["coninc_quantiles", "hs_or_college", "age_cat"]
+] + weights
+theo_vars_add: list[str] = ["age_cat", "coninc_quantiles", "hs_or_college"]
 
 if mode == "raw":
     print(f"Loading GSS from {path}")
@@ -121,9 +118,22 @@ elif mode == "students":
     print("Writing wrangled data set.")
     gss.to_csv("gss_wrangled.csv", index=False)
 
+    # Sort features but place weights at the end
+    saf_vars_gen: Iterable = chain(
+        (var for var in sorted(safiya_vars + safiya_vars_add) if var not in weights),
+        weights,
+    )
+    theo_vars_gen: Iterable = chain(
+        (var for var in sorted(theo_vars + theo_vars_add) if var not in weights),
+        weights,
+    )
+
     print("Creating student specific data sets")
-    gss_saf: pd.DataFrame = gss[safiya_vars + safiya_vars_add].query("year >= 2010")
-    gss_theo: pd.DataFrame = gss[theo_vars + theo_vars_add].query("year >= 2008")
+    gss_saf: pd.DataFrame = gss[saf_vars_gen].query("year >= 2010")
+    valid_ethnic: list[str] = ["Africa", "Mexico"]
+    gss_theo: pd.DataFrame = gss[theo_vars_gen].query(
+        "(year >= 2008) and (ethnic in @valid_ethnic)"
+    )
 
     print("Writing student data sets to CSV")
     gss_saf.to_csv("safiya_clean.csv", index=False)

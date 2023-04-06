@@ -335,7 +335,7 @@ def recode_small_features(gss: pd.DataFrame) -> pd.DataFrame:
         DataFrame with recoded values.
     """
     sex: dict[int, str] = {1: "Male", 2: "Female"}
-    gss["sex"].astype("Int64").map(sex).astype("category")
+    gss["sex"] = gss["sex"].astype("Int64").map(sex).astype("category")
 
     # Does R speak a language other than English or Spanish?
     gss["othlang"] = (
