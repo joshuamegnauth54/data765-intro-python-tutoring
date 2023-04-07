@@ -10,14 +10,14 @@ python = "^3.10"
 jupyter = "^1.0.0"
 matplotlib = "^3.7.1"
 numpy = ">=1.24.2"
-pandas = "^1.5.3"
+pandas = "^2.0.0"
 requests = "^2.28.1"
-seaborn = "^0.11.2"
+seaborn = "^0.12.2"
 statsmodels = "^0.13.5"
 
 [tool.poetry.group.dev.dependencies]
-black = "^22.6.0"
-ruff = "^0.0.255"
+black = "^23.3.0"
+ruff = "^0.0.261"
 
 [tool.poetry.group.thesis.dependencies]
 pyarrow = "^11.0"
@@ -29,14 +29,14 @@ asyncio = "^3.4.3"
 [tool.ruff]
 fix = true
 select = [
-    "E",
-    "F",
-    "W",
-    "B",
-    "I",
-    "SIM",
-    "PD", # pandas
-    "NPY" # NumPy
+  "E",
+  "F",
+  "W",
+  "B",
+  "I",
+  "SIM",
+  "PD",  # pandas
+  "NPY", # NumPy
 ]
 typing-modules = ["numpy.typing"]
 

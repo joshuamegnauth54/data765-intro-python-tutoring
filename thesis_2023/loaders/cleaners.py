@@ -4,7 +4,9 @@ from typing import Literal, TypeAlias
 import numpy as np
 import pandas as pd
 
+# Types
 Number: TypeAlias = np.number | float | int | pd.Int64Dtype
+AgeCat: TypeAlias = Literal["18-29", "30-39", "40-49", "50-59", "60-69", "70+", pd.NA]
 
 
 def recode_ethnic(ethnic: Number) -> str | Literal[pd.NA]:
@@ -182,7 +184,9 @@ def recode_ethnic(ethnic: Number) -> str | Literal[pd.NA]:
             return pd.NA
 
 
-def recode_partyid(party: Number) -> Literal["Democrat", "Republican", "Other", pd.NA]:
+def recode_partyid(
+    party: Number,
+) -> Literal["Democrat", "Republican", "Independent", pd.NA]:
     """Recode GSS's `partyid` variable by collapsing the redundant categories.
 
     https://gssdataexplorer.norc.org/variables/141/vshow
@@ -194,7 +198,7 @@ def recode_partyid(party: Number) -> Literal["Democrat", "Republican", "Other", 
 
     Returns
     -------
-    Literal["Democrat", "Republican", "Other", pd.NA]
+    Literal["Democrat", "Republican", "Independent", pd.NA]
         String representing the input's collapsed category.
     """
     match party:
@@ -205,7 +209,7 @@ def recode_partyid(party: Number) -> Literal["Democrat", "Republican", "Other", 
         case 4 | 5 | 6:
             return "Republican"
         case 3 | 7:
-            return "Other"
+            return "Independent"
         case _:
             return pd.NA
 
@@ -288,7 +292,7 @@ def recode_letin_binary(
             return pd.NA
 
 
-def recode_age(age: int | Literal[np.nan, pd.NA]):
+def recode_age(age: int | Literal[np.nan, pd.NA]) -> AgeCat:
     """Destroy age by recoding it into a category.
 
     Parameters
@@ -298,7 +302,7 @@ def recode_age(age: int | Literal[np.nan, pd.NA]):
 
     Returns
     -------
-    str
+    AgeCat
         Lossy, categorized age as a string.
     """
     if pd.isna(age):
