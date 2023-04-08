@@ -54,7 +54,7 @@ theo_vars: list[str] = [
     "coninc",
     "talkspvs",
 ] + weights
-theo_vars_add: list[str] = ["age_cat", "coninc_quantiles", "hs_or_college"]
+theo_vars_add: list[str] = ["age_cat", "coninc_log", "coninc_quantiles", "hs_or_college"]
 
 if mode == "raw":
     print(f"Loading GSS from {path}")
