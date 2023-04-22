@@ -64,11 +64,11 @@
                 #grid(
                     columns: (1fr, 1fr),
                     align(left)[
-                        66.4%\
+                        66.8%\
                         #text(size: 0.8em)[1.4%]
                     ],
                     align(right)[
-                        44.7%\
+                        33.2%\
                         #text(size: 0.8em)[1.42%]
                     ]
                 )
@@ -77,11 +77,11 @@
                 #grid(
                     columns: (1fr, 1fr),
                     align(left)[
-                        3.7%\
+                        66.6%\
                         #text(size: 0.8em)[.4%]
                     ],
                     align(right)[
-                        2.5%\
+                        33.4%\
                         #text(size: 0.8em)[.29%]
                     ]
                 )
@@ -90,11 +90,11 @@
                 #grid(
                     columns: (1fr, 1fr),
                     align(left)[
-                        29.8%\
+                        43%\
                         #text(size: 0.8em)[1.1%]
                     ],
                     align(right)[
-                        52.8%\
+                        57%\
                         #text(size: 0.8em)[1.5%]
                     ]
                 )
