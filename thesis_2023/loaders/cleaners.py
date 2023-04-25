@@ -241,6 +241,48 @@ def recode_degree(
             return pd.NA
 
 
+def recode_degree_all(
+    degree: Number,
+) -> Literal[
+    "Less than high school",
+    "High school",
+    "Junior college",
+    "Bachelor's",
+    "Graduate",
+    pd.NA,
+]:
+    """Recode degree without dropping categories.
+
+    Parameters
+    ----------
+    degree : Number
+
+    Returns
+    -------
+    Literal[
+        "Less than high school",
+        "High school",
+        "Junior college",
+        "Bachelor's",
+        "Graduate",
+        pd.NA
+    ]
+    """
+    match degree:
+        case _ if pd.isna(degree):
+            return pd.NA
+        case 0:
+            return "Less than high school"
+        case 1:
+            return "High school"
+        case 2:
+            return "Junior college"
+        case 3:
+            return "Bachelor's"
+        case 4:
+            return "Graduate"
+
+
 def recode_degree_binary(
     degree: Number,
 ) -> Literal["HS or less", "Some college", pd.NA]:

@@ -11,6 +11,7 @@ import pandas as pd
 from loaders.cleaners import (
     recode_age,
     recode_degree,
+    recode_degree_all,
     recode_degree_binary,
     recode_ethnic,
     recode_letin_binary,
@@ -58,6 +59,7 @@ theo_vars_add: list[str] = [
     "age_cat",
     "coninc_log",
     "coninc_quantiles",
+    "degree_all",
     "hs_or_college",
 ]
 
@@ -115,6 +117,7 @@ elif mode == "students":
     gss["ethnic"] = gss["ethnic"].map(recode_ethnic).astype("category")
     gss["partyid"] = gss["partyid"].map(recode_partyid).astype("category")
     gss["hs_or_college"] = gss["degree"].map(recode_degree_binary).astype("category")
+    gss["degree_all"] = gss["degree"].map(recode_degree_all).astype("category")
     gss["degree"] = gss["degree"].map(recode_degree).astype("category")
     gss = recode_small_features(gss)
     gss["decrease_imm"] = gss["letin1a"].map(recode_letin_binary).astype("category")
