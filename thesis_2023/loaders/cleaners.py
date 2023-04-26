@@ -214,6 +214,28 @@ def recode_partyid(
             return pd.NA
 
 
+def create_president(year: Number) -> Literal["Obama", "Trump", pd.NA]:
+    """Encode year as a feature for the president holding office at the time.
+
+    This is only valid for president Obama and Trump.
+
+    Parameters
+    ----------
+    year : Number
+        Year that the GSS was collected.
+
+    Returns
+    -------
+    Literal["Obama", "Trump", pd.NA]
+    """
+    if year >= 2008 and year < 2017:
+        return "Obama"
+    elif year >= 2017 and year <= 2021:
+        return "Trump"
+    else:
+        return pd.NA
+
+
 def recode_degree(
     degree: Number,
 ) -> Literal["No degree", "HS or assoc", "College", pd.NA]:

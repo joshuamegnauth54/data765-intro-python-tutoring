@@ -9,6 +9,7 @@ from typing import Iterable
 import pandas as pd
 
 from loaders.cleaners import (
+    create_president,
     recode_age,
     recode_degree,
     recode_degree_all,
@@ -43,7 +44,12 @@ safiya_vars: list[str] = [
     "letin1a",
     "coninc",
 ] + weights
-safiya_vars_add: list[str] = ["coninc_log", "decrease_imm", "hs_or_college"]
+safiya_vars_add: list[str] = [
+    "coninc_log",
+    "decrease_imm",
+    "hs_or_college",
+    "president",
+]
 theo_vars: list[str] = [
     "year",
     "age",
@@ -119,6 +125,7 @@ elif mode == "students":
     gss["hs_or_college"] = gss["degree"].map(recode_degree_binary).astype("category")
     gss["degree_all"] = gss["degree"].map(recode_degree_all).astype("category")
     gss["degree"] = gss["degree"].map(recode_degree).astype("category")
+    gss["president"] = gss["year"].map(create_president).astype("category")
     gss = recode_small_features(gss)
     gss["decrease_imm"] = gss["letin1a"].map(recode_letin_binary).astype("category")
     gss["age_cat"] = gss["age"].map(recode_age).astype("category")
@@ -137,7 +144,7 @@ elif mode == "students":
     )
 
     print("Creating student specific data sets")
-    gss_saf: pd.DataFrame = gss[saf_vars_gen].query("year >= 2010")
+    gss_saf: pd.DataFrame = gss[saf_vars_gen].query("year >= 2008")
     valid_ethnic: list[str] = ["Africa", "Mexico"]
     gss_theo: pd.DataFrame = gss[theo_vars_gen].query(
         "(year >= 2008) and (ethnic in @valid_ethnic)"
