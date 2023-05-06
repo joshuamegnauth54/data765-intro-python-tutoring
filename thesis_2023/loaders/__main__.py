@@ -15,6 +15,7 @@ from loaders.cleaners import (
     recode_degree_all,
     recode_degree_binary,
     recode_ethnic,
+    recode_income_oth_cats,
     recode_letin_binary,
     recode_partyid,
     recode_small_features,
@@ -45,6 +46,7 @@ safiya_vars: list[str] = [
     "coninc",
 ] + weights
 safiya_vars_add: list[str] = [
+    "coninc_cat",
     "coninc_log",
     "decrease_imm",
     "hs_or_college",
@@ -129,6 +131,7 @@ elif mode == "students":
     gss = recode_small_features(gss)
     gss["decrease_imm"] = gss["letin1a"].map(recode_letin_binary).astype("category")
     gss["age_cat"] = gss["age"].map(recode_age).astype("category")
+    gss["coninc_cat"] = gss["coninc"].map(recode_income_oth_cats).astype("category")
 
     print("Writing wrangled data set.")
     gss.to_csv("gss_wrangled.csv", index=False)

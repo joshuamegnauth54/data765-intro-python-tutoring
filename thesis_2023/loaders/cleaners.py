@@ -1,12 +1,23 @@
 """Functions for wrangling students' data sets."""
-from typing import Literal, TypeAlias
+from typing import Literal, SupportsInt, TypeAlias
 
 import numpy as np
 import pandas as pd
 
 # Types
-Number: TypeAlias = np.number | float | int | pd.Int64Dtype
+Number: TypeAlias = np.number | float | int | pd.Int64Dtype | SupportsInt
 AgeCat: TypeAlias = Literal["18-29", "30-39", "40-49", "50-59", "60-69", "70+", pd.NA]
+IncomeCat: TypeAlias = Literal[
+    "<20K",
+    "20K-30K",
+    "30K-40K",
+    "40K-60K",
+    "60K-80K",
+    "80K-100K",
+    "100K-160K",
+    "160K+",
+    pd.NA,
+]
 
 
 def recode_ethnic(ethnic: Number) -> str | Literal[pd.NA]:
@@ -74,6 +85,7 @@ def recode_ethnic(ethnic: Number) -> str | Literal[pd.NA]:
         case _ if pd.isna(ethnic):
             return pd.NA
         case eth if ethnic in range(1, 42):
+            assert isinstance(eth, (int, float))
             eth = int(eth)
             return first_set[eth - 1]
         case 97:
@@ -228,6 +240,7 @@ def create_president(year: Number) -> Literal["Obama", "Trump", pd.NA]:
     -------
     Literal["Obama", "Trump", pd.NA]
     """
+    assert isinstance(year, (int, float))
     if year >= 2008 and year < 2017:
         return "Obama"
     elif year >= 2017 and year <= 2021:
@@ -383,6 +396,41 @@ def recode_age(age: int | Literal[np.nan, pd.NA]) -> AgeCat:
         return "60-69"
     elif age > 69:
         return "70+"
+    else:
+        return pd.NA
+
+
+def recode_income_oth_cats(income: Number) -> IncomeCat:
+    """Recode age into a few categories.
+
+    Parameters
+    ----------
+    income: Number
+        `coninc` feature from the GSS.
+
+    Returns
+    -------
+    IncomeCat
+        Lossy, recoded income.
+    """
+    assert isinstance(income, (int, float))
+
+    if income < 20000 and income >= 0:
+        return "<20K"
+    elif income >= 20000 and income < 30000:
+        return "20K-30K"
+    elif income >= 30000 and income < 40000:
+        return "30K-40K"
+    elif income >= 40000 and income < 60000:
+        return "40K-60K"
+    elif income >= 60000 and income < 80000:
+        return "60K-80K"
+    elif income >= 80000 and income < 100000:
+        return "80K-100K"
+    elif income >= 100000 and income < 160000:
+        return "100K-160K"
+    elif income >= 160000:
+        return "160K+"
     else:
         return pd.NA
 
