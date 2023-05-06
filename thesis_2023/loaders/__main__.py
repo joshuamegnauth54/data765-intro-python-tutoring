@@ -46,6 +46,7 @@ safiya_vars: list[str] = [
     "coninc",
 ] + weights
 safiya_vars_add: list[str] = [
+    "age_cat",
     "coninc_cat",
     "coninc_log",
     "decrease_imm",
